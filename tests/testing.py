@@ -1,2 +1,4 @@
-def first_test():
-    assert 1 == 1
+
+
+def test_function():
+    assert 1 == (3-2)
