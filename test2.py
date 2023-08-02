@@ -24,11 +24,15 @@ if __name__ == '__main__':
 
     n = 20
 
-    # tms.solve_two_mirrors_parallel_source_two_targets(starting_distribution=func.E, target_distribution_1=func.G1,
-    #                                                   target_distribution_2=func.G2, x_span=x_span, y1_span=y1_span,
-    #                                                   y2_span=y2_span,
-    #                                                   u0=u0, w0=w0, l1=l1, l2=l2,
-    #                                                   number_rays=15)
+    # G2 = lambda y2: 1 - np.abs(y2 - sum(y2_span)*0.5) if y2_span[0] < y2 <= y2_span[1] + 0.0001 else 0.0001
+    # this function gives cursed outputs!
+    tms.solve_two_mirrors_parallel_source_two_targets(starting_density=func.E, target_distribution_1=func.G1,
+                                                      target_distribution_2=func.G1, x_span=x_span, y1_span=y1_span,
+                                                      y2_span=y2_span,
+                                                      u0=u0, w0=w0, l1=l1, l2=l2,
+                                                      # color='#a69f3f',
+                                                      number_rays=15
+                                                      )
 
     G1 = lambda y1: 1
     G2 = lambda y2: 1 - np.abs(y2 - 12) if 11 < y2 < 13 else 0

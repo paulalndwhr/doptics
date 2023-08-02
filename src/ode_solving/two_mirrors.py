@@ -8,33 +8,32 @@ from src.ode_solving.symbolic import u_prime_mv
 
 # from main import FILENAME
 BEAMPROPERTIES = {'preserve': {'sign': 1, 'index': 0}, 'cross': {'sign': -1, 'index': -1}}
+COLORS = {'szegedblue': '#3f3fa6'}
 
 
-def solve_two_mirrors_parallel_source_two_targets(starting_distribution: Callable, target_distribution_1: Callable,
+def solve_two_mirrors_parallel_source_two_targets(starting_density: Callable, target_distribution_1: Callable,
                                                   target_distribution_2, x_span: List[float], y1_span: List[float],
                                                   y2_span: List[float],
                                                   u0: float, w0: float, l1: float, l2: float,
-                                                  number_rays=15):
+                                                  number_rays=15,
+                                                  color: str = 'szegedblue'):
 
     x_discrete = np.linspace(x_span[0], x_span[1], number_rays)
+    ax = sp.integrate.quad(starting_density, x_span[0], x_span[1])[0]
+    starting_density_rescaled = lambda x: 1 / ax * starting_density(x)
     for result_type in [['preserve', 'cross'], ['preserve', 'preserve'], ['cross', 'preserve'], ['cross', 'cross']]:
         print(f'result_type {result_type}')
-        a1 = sp.integrate.quad(starting_distribution, x_span[0], x_span[1])[0] / \
-             sp.integrate.quad(target_distribution_1, y1_span[0], y1_span[1])[0]
-        a2 = sp.integrate.quad(starting_distribution, x_span[0], x_span[1])[0] / \
-             sp.integrate.quad(target_distribution_1, y2_span[0], y2_span[1])[0]
+        a1 = 1 / sp.integrate.quad(target_distribution_1, y1_span[0], y1_span[1])[0]
+        a2 = 1 / sp.integrate.quad(target_distribution_1, y2_span[0], y2_span[1])[0]
         target_density_1_rescaled = lambda y: a1 * target_distribution_1(y)
         target_density_2_rescaled = lambda y: a2 * target_distribution_2(y)
 
         m1_prime = lambda x, m: BEAMPROPERTIES[result_type[0]]['sign'] \
-                                * starting_distribution(x) / target_density_1_rescaled(m)
+                                * starting_density_rescaled(x) / target_density_1_rescaled(m)
         m2_prime = lambda x, m: BEAMPROPERTIES[result_type[1]]['sign'] \
-                                * starting_distribution(x) / target_density_1_rescaled(m)
+                                * target_density_1_rescaled(x) / target_density_2_rescaled(m)
 
         # ==========================================
-        """
-        code adapted until here
-        """
 
         y1_0 = y1_span[BEAMPROPERTIES[result_type[0]]['index']]
         m1_solved = sp.integrate.solve_ivp(m1_prime, x_span, [y1_0], dense_output=1)
@@ -71,29 +70,13 @@ def solve_two_mirrors_parallel_source_two_targets(starting_distribution: Callabl
             B1[i] = m1(x_discrete[i]) - t_hat(m1(x_discrete[i]))[0] * wi
             B2[i] = l1 - t_hat(m1(x_discrete[i]))[1] * wi
 
-        # For ray tracing
-        # rtn = 1000
-        # Ar = np.empty((rtn, 2))
-        # Br = np.empty((rtn, 2))
-        # Ar[:, 0] = np.linspace(x_span[0], x_span[1], rtn)
-        # for i in range(rtn):
-        #     Ar[i, 1] = u_solved.sol(Ar[i, 0])[0]
-        #     wi = w(Ar[i, 0], m1(Ar[i, 0]), Ar[i, 1], V(m1(Ar[i, 0])), t_hat(m1(Ar[i, 0]))[0], t_hat(m1(Ar[i, 0]))[1], l1)
-        #     Br[i, 0] = m1(Ar[i, 0]) - t_hat(m1(Ar[i, 0]))[0] * wi
-        #     Br[i, 1] = l1 - t_hat(m1(Ar[i, 0]))[1] * wi
-        #
-        # # np.savez("result.npz", A=Ar, B=Br, l1=l1, l2=l2, x_span=x_span, y1_span=y1_span, y2_span=y2_span)
-
-        # Color test
-        # """
         xis = np.arange(0, 1, 0.02)
-        Es = starting_distribution(xis)
-        # col = Es / np.max(Es) * 0.2
-        col = np.ones(xis.shape)
-        """
-        xis = cdf_sampling_source(E, np.arange(0, 1, 0.05))
-        col = np.ones(xis.shape)
-        #"""
+
+        # Color ray with preset from COLORS dictionary if the key exists, else try color string as a color
+        try:
+            raycolor = COLORS[color]
+        except KeyError:
+            raycolor = color
 
         for i, xi in enumerate(xis):
             y1i = m1(xi)
@@ -105,7 +88,9 @@ def solve_two_mirrors_parallel_source_two_targets(starting_distribution: Callabl
 
             plt.plot([xi, xi, y1i - wi * t1i, y2i],
                      [0, ui, l1 - wi * t2i, l2],
-                     "r", alpha=col[i], linewidth=1.5)
+                     raycolor,
+                     # alpha=col[i],
+                     linewidth=1.5)
 
         plt.plot(x_discrete, u_discrete, "g")
         plt.plot(B1, B2, "g")
@@ -118,30 +103,4 @@ def solve_two_mirrors_parallel_source_two_targets(starting_distribution: Callabl
         plt.show()
 
     return None
-
-
-
-# xs = np.linspace(x_span[0], x_span[1], number_rays)
-# # for result_type in [1, -1]:
-# for result_type in ['preserve', 'cross']:
-#     a = sp.integrate.quad(starting_distribution, x_span[0], x_span[1])[0] / \
-#         sp.integrate.quad(target_distribution, y_span[0], y_span[1])[0]
-#     target_density_rescaled = lambda y: a * target_distribution(y)
-# 
-#     m_prime = lambda x, m: BEAMPROPERTIES[result_type]['sign'] * starting_distribution(x) / target_density_rescaled(m)
-# 
-#     # y0 = y_span[0] if result_type == 1 else y_span[1]
-#     y0 = y_span[BEAMPROPERTIES[result_type]['index']]
-# 
-#     m_solved = sp.integrate.solve_ivp(m_prime, x_span, [y0], t_eval=xs, dense_output=True)
-#     m = m_solved.sol
-# 
-#     u_prime = lambda x, u: (m(x) - x) / (((m(x) - x)**2 + (-l + u)**2)**.5 - l + u)
-#     u_solved = sp.integrate.solve_ivp(u_prime, x_span, [u0], t_eval=xs).y.reshape(-1)
-# 
-#     plt.clf()
-#     plt.plot(xs, u_solved, "k")
-#     for i in range(len(xs)):
-#         plt.plot([xs[i], xs[i], m_solved.y.reshape(-1)[i]], [0, u_solved[i], +l])
-#     plt.savefig(f'solution-mirror-{result_type}.png')
 
