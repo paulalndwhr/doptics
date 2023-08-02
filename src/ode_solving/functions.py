@@ -26,12 +26,19 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
     max_ = linear_samples[-1]  # =2
     delta = (max_ - min_)/len(linear_samples-1)
     fine_ladder = np.linspace(min_, max_, total_samples)
-    probability_density = lambda x: 1 / (sp.integrate.quad(source_density, linear_samples[0], linear_samples[-1])[0]) * source_density(x)
+    probability_density = lambda x: source_density(x) / (sp.integrate.quad(source_density,
+                                                                           linear_samples[0],
+                                                                           linear_samples[-1])[0])
 
     phi_arr = [probability_density(sample)*(1/total_samples) for sample in fine_ladder]
+
+    # abusing that Phi_arr is initialized as np.zeros(len(phi_arr)), the following speed-up can be achieved:
     Phi_arr = np.zeros(len(phi_arr))
-    for i in range(len(phi_arr)):
-        Phi_arr[i] = sum(phi_arr[0:i])
+    for i, elt in enumerate(phi_arr):
+        Phi_arr[i] = Phi_arr[i - 1] + elt  # abuses np.zeros()
+        Phi_arr = np.roll(Phi_arr, 1)
+        Phi_arr[0] = 0
+        return Phi_arr
 
     distr_samples = np.zeros(len(linear_samples))
     for i in range(len(distr_samples)):
@@ -68,10 +75,11 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
     print(np.cos(small_angle))
     print(np.cos(large_angle))
 
-    y1_span = np.array([np.cos(small_angle), np.cos(large_angle)
-               * np.sin(abs_small_angle)/np.sin(abs_large_angle)])  # .sort(reverse=False)
-    y2_span = np.sort( np.array([np.cos(large_angle), np.cos(small_angle)
-               * np.sin(abs_large_angle)/np.sin(abs_small_angle)]) )
+    y1_span = np.array([np.cos(small_angle), np.cos(large_angle) * np.sin(abs_small_angle)/np.sin(abs_large_angle)])
+    y2_span = np.sort(
+        np.array([np.cos(large_angle), np.cos(small_angle) * np.sin(abs_large_angle)/np.sin(abs_small_angle)])
+    )
+
     print(y1_span)
     print(y2_span)
 
@@ -82,17 +90,10 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
 
     print(y2_span)
 
-    # y1_arr = np.linspace(y1_span[0], y1_span[1], precision)
-    # y2_arr = np.linspace(y2_span[0], y2_span[1], precision)
-
-    # y1_density = lambda y1: angle_density(np.arccos(y1)) / np.linalg.norm([y1-center[0], l1-center[1]])
-    # y2_density = lambda y2: angle_density(np.arccos(y2)) / np.linalg.norm([y2 - center[0], l1 - center[1]])
-    y1_density = lambda y1: angle_density(np.arccos(y1 / np.linalg.norm([y1-center[0], l1-center[1]]))) / np.linalg.norm([y1-center[0], l1-center[1]])
-    y2_density = lambda y2: angle_density(np.arccos(y2 / np.linalg.norm([y2-center[0], l2-center[1]]))) / np.linalg.norm([y2-center[0], l2-center[1]])
+    y1_density = lambda y1: angle_density(np.arccos(y1 / np.linalg.norm(np.array([y1-center[0], l1-center[1]], dtype=object)))) / np.linalg.norm(np.array([y1-center[0], l1-center[1]], dtype=object))
+    y2_density = lambda y2: angle_density(np.arccos(y2 / np.linalg.norm(np.array([y2-center[0], l2-center[1]], dtype=object)))) / np.linalg.norm(np.array([y2-center[0], l2-center[1]], dtype=object))
     for i in np.linspace(small_angle, large_angle, 100):
         print(f'y2({i}) = {y2_density(i)}')
-    # print(f'pppppp{y1_density(y1_span[0])}')
-    # print(f'qqqqqqq{y2_density(y2_span[0])}')
     y1_span = y1_span + center[0]
     y2_span = y2_span + center[0]
     for j in np.linspace(y2_span[0], y2_span[1], 100):
@@ -101,10 +102,6 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
     print(f'qqqqqqq{y2_density(y2_span[0])}')
     return y1_density, y2_density, y1_span, y2_span, l1 + center[1], l2 + center[1]
 
-
-    # construct L2
-
-    # construct L1
 
 def f(x):
     return 1
