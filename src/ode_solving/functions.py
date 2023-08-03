@@ -4,6 +4,8 @@ import scipy as sp
 from typing import Callable, List
 from numpy.typing import ArrayLike
 from main import YL, YR, SIGMA, XL, XR
+
+
 uniform = lambda x: 1
 triangle = lambda x: x
 normal_10 = lambda x: np.exp(-0.5*((x-0)/SIGMA)**2) + 0.1
@@ -31,18 +33,20 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
                                                                            linear_samples[-1])[0])
 
     phi_arr = [probability_density(sample)*(1/total_samples) for sample in fine_ladder]
+    print(phi_arr)
+    print('das war phi_arr')
 
     # abusing that Phi_arr is initialized as np.zeros(len(phi_arr)), the following speed-up can be achieved:
     Phi_arr = np.zeros(len(phi_arr))
     for i, elt in enumerate(phi_arr):
         Phi_arr[i] = Phi_arr[i - 1] + elt  # abuses np.zeros()
-        Phi_arr = np.roll(Phi_arr, 1)
-        Phi_arr[0] = 0
-        return Phi_arr
+    Phi_arr = np.roll(Phi_arr, 1)
+    Phi_arr[0] = 0
+    # return Phi_arr
 
     distr_samples = np.zeros(len(linear_samples))
     for i in range(len(distr_samples)):
-        ladder_index = len([x for x in Phi_arr if x <= + i*delta])
+        ladder_index = len([x for x in Phi_arr if x <= + i*delta]) -1
         distr_samples[i] = fine_ladder[ladder_index]
     distr_samples[-1] = max_
     return distr_samples
