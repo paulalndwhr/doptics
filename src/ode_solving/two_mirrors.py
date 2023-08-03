@@ -4,6 +4,7 @@ from typing import Callable, List
 import matplotlib.pyplot as plt
 import numpy as np
 from src.ode_solving.symbolic import u_prime_mv
+from src.ode_solving.functions import cdf_sampling_source
 
 
 # from main import FILENAME
@@ -71,6 +72,7 @@ def solve_two_mirrors_parallel_source_two_targets(starting_density: Callable, ta
             B2[i] = l1 - t_hat(m1(x_discrete[i]))[1] * wi
 
         xis = np.arange(0, 1, 0.02)
+        xis = cdf_sampling_source(starting_density_rescaled, xis)
 
         # Color ray with preset from COLORS dictionary if the key exists, else try color string as a color
         try:
