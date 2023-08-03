@@ -39,7 +39,8 @@ if __name__ == '__main__':
     # E = lambda x: 1 / (np.exp(10 * (x - 0.5)) + np.exp(-10 * (x - 0.5)))
 
     # new stuff
-    E = func.uniform
+    # E = func.uniform
+    E = lambda x: np.exp(-0.5*((x-((1+0)*0.5))/0.25)**2) + 0.01
     G2, G1, y2_span, y1_span, l2, l1 = func.construct_target_density_intervals_from_angular(angle_density=func.normal_10,  #lambda x: x,
                                                                                             small_angle=-0.7 * np.pi,
                                                                                             large_angle=-0.3 * np.pi)
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     x_discrete = np.linspace(x_span[0], x_span[1], n)
 
     BEAMPROPERTIES = {'preserve': {'sign': 1, 'index': 0}, 'cross': {'sign': -1, 'index': -1}}
-    for result_type in [['preserve', 'cross'], ['preserve', 'preserve'], ['cross', 'preserve'], ['cross', 'cross']]:
+    for result_type in [['preserve', 'preserve'], ['cross', 'preserve']]:  # ['preserve', 'cross'], ['cross', 'cross']]:
         print(f'result_type {result_type}')
 
         G1_int = sp.integrate.quad(G1, y1_span[0], y1_span[1])[0]
@@ -62,16 +63,18 @@ if __name__ == '__main__':
         a1 = G1_int / sp.integrate.quad(E, x_span[0], x_span[1])[0]
         E_fixed = lambda x: a1 * E(x)
 
-        pm1 = - 1  # +-1
-        pm2 = 1  # +-1
-        m1_prime = lambda x, m1: E_fixed(x) / G1(m1) * pm1
-        m2_prime = lambda y, m2: G1(y) / G2_fixed(m2) * pm2
+        # pm1 = - 1  # +-1
+        # pm2 = 1  # +-1
+        m1_prime = lambda x, m1: E_fixed(x) / G1(m1) * BEAMPROPERTIES[result_type[0]]['sign']
+        m2_prime = lambda y, m2: G1(y) / G2_fixed(m2) * BEAMPROPERTIES[result_type[1]]['sign']
 
-        y1_0 = y1_span[0] if pm1 == 1 else y1_span[1]
+        # y1_0 = y1_span[0] if pm1 == 1 else y1_span[1]
+        y1_0 = y1_span[BEAMPROPERTIES[result_type[0]]['index']]
         m1_solved = sp.integrate.solve_ivp(m1_prime, x_span, [y1_0], dense_output=1)
         m1 = lambda x: m1_solved.sol(x)[0]
 
-        y2_0 = y2_span[0] if pm2 == 1 else y2_span[1]
+        # y2_0 = y2_span[0] if pm2 == 1 else y2_span[1]
+        y2_0 = y2_span[BEAMPROPERTIES[result_type[1]]['index']]
         m2_solved = sp.integrate.solve_ivp(m2_prime, y1_span, [y2_0], dense_output=1)
         m2 = lambda y1: m2_solved.sol(y1)[0]
 
@@ -139,7 +142,7 @@ if __name__ == '__main__':
 
             plt.plot([xi, xi, y1i - wi * t1i, y2i],
                      [0, ui, l1 - wi * t2i, l2],
-                     "r", alpha=col[i], linewidth=1.5)
+                     "r", alpha=0.6, linewidth=1.5)
             plt.plot([y2i, y2i - .2*(y2i-y1i - wi * t1i)], [l2, l2 - .2*(l2 - l1 - wi * t2i)], 'g', linewidth=1.5)
         plt.plot([10 for i in range(100)], np.linspace(0, 12, 100))
         plt.plot(np.linspace(0, 12, 100), [10 for i in range(100)])
