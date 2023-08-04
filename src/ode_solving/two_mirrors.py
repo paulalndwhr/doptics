@@ -94,8 +94,22 @@ def solve_two_mirrors_parallel_source_two_targets(starting_density: Callable, ta
                      # alpha=col[i],
                      linewidth=1.5)
 
-        plt.plot(x_discrete, u_discrete, "g")
+        # better plotting of the reflectors
+        precision = 1000
+        x_arr_u = np.linspace(x_span[0], x_span[1], precision)
+        spline_u = sp.interpolate.CubicSpline(x_discrete, u_discrete)
+        plt.plot(x_arr_u, spline_u(x_arr_u), "r")
+        if BEAMPROPERTIES[result_type[0]]['sign'] == -1:  # * BEAMPROPERTIES[result_type[1]]['sign'] == -1:
+            B1 = np.flipud(B1)
+            B2 = np.flipud(B2)
         plt.plot(B1, B2, "g")
+
+        x_arr_w = np.linspace(B1.min(), B1.max(), precision)
+        spline_w = sp.interpolate.CubicSpline(B1, B2)
+        plt.plot(x_arr_w, spline_w(x_arr_w), "r")
+
+        # plt.plot(x_discrete, u_discrete, "g")
+        # plt.plot(B1, B2, "g")
         plt.plot(x_span, [0, 0], "k")
         plt.plot(y1_span, [l1, l1], "k")
         plt.plot(y2_span, [l2, l2], "k")

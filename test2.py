@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     # G2 = lambda y2: 1 - np.abs(y2 - sum(y2_span)*0.5) if y2_span[0] < y2 <= y2_span[1] + 0.0001 else 0.0001
     # this function gives cursed outputs!
-    tms.solve_two_mirrors_parallel_source_two_targets(starting_density=func.E, target_distribution_1=func.G1,
+    tms.solve_two_mirrors_parallel_source_two_targets(starting_density=func.uniform, target_distribution_1=func.G1,
                                                       target_distribution_2=func.G1, x_span=x_span, y1_span=y1_span,
                                                       y2_span=y2_span,
                                                       u0=u0, w0=w0, l1=l1, l2=l2,
@@ -148,7 +148,21 @@ if __name__ == '__main__':
         plt.plot(np.linspace(0, 12, 100), [10 for i in range(100)])
 
         plt.plot(x_discrete, u_discrete, "g")
+        # better plotting of the reflectors using splines
+        precision = 1000
+        x_arr_u = np.linspace(x_span[0], x_span[1], precision)
+        spline_u = sp.interpolate.CubicSpline(x_discrete, u_discrete)
+        plt.plot(x_arr_u, spline_u(x_arr_u), "r")
+
+        if BEAMPROPERTIES[result_type[0]]['sign'] * BEAMPROPERTIES[result_type[1]]['sign'] == -1:
+            B1 = np.flipud(B1)
+            B2 = np.flipud(B2)
         plt.plot(B1, B2, "g")
+
+        x_arr_w = np.linspace(B1.min(), B1.max(), precision)
+        spline_w = sp.interpolate.CubicSpline(B1, B2)
+        plt.plot(x_arr_w, spline_w(x_arr_w), "r")
+
         plt.plot(x_span, [0, 0], "k")
         plt.plot(y1_span, [l1, l1], "k")
         plt.plot(y2_span, [l2, l2], "k")

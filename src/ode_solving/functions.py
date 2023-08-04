@@ -26,7 +26,8 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
     """
     min_ = linear_samples[0]  # =1
     max_ = linear_samples[-1]  # =2
-    delta = (max_ - min_)/len(linear_samples-1)
+    # delta = (max_ - min_)/(len(linear_samples)-1)
+    delta = (max_ - min_) / (len(linear_samples))
     fine_ladder = np.linspace(min_, max_, total_samples)
     probability_density = lambda x: source_density(x) / (sp.integrate.quad(source_density,
                                                                            linear_samples[0],
@@ -35,6 +36,7 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
     phi_arr = [probability_density(sample)*(1/total_samples) for sample in fine_ladder]
     print(phi_arr)
     print('das war phi_arr')
+    print(sum(phi_arr))
 
     # abusing that Phi_arr is initialized as np.zeros(len(phi_arr)), the following speed-up can be achieved:
     Phi_arr = np.zeros(len(phi_arr))
@@ -43,10 +45,15 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
     Phi_arr = np.roll(Phi_arr, 1)
     Phi_arr[0] = 0
     # return Phi_arr
+    print(Phi_arr)
 
     distr_samples = np.zeros(len(linear_samples))
+    inverted_Phi = reversed(Phi_arr)
+    quantiles = np.linspace(0, 1, len(linear_samples))
     for i in range(len(distr_samples)):
-        ladder_index = len([x for x in Phi_arr if x <= + i*delta]) -1
+        # ladder_index = next(x[0] for x in enumerate(inverted_Phi) if x[1] < delta*i)
+        # ladder_index = len([x for x in Phi_arr if x <= + i*delta]) - 1
+        ladder_index = len([x for x in Phi_arr if x <= + quantiles[i]]) - 1
         distr_samples[i] = fine_ladder[ladder_index]
     distr_samples[-1] = max_
     return distr_samples
