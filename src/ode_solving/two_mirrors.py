@@ -17,11 +17,29 @@ def solve_two_mirrors_parallel_source_two_targets(starting_density: Callable, ta
                                                   y2_span: List[float],
                                                   u0: float, w0: float, l1: float, l2: float,
                                                   number_rays=15,
-                                                  color: str = 'szegedblue'):
+                                                  color: str = 'szegedblue') -> List[dict]:
+    """
 
+    :param starting_density:
+    :param target_distribution_1:
+    :param target_distribution_2:
+    :param x_span:
+    :param y1_span:
+    :param y2_span:
+    :param u0:
+    :param w0:
+    :param l1:
+    :param l2:
+    :param number_rays:
+    :param color:
+    :return:
+    """
     x_discrete = np.linspace(x_span[0], x_span[1], number_rays)
     ax = sp.integrate.quad(starting_density, x_span[0], x_span[1])[0]
     starting_density_rescaled = lambda x: 1 / ax * starting_density(x)
+
+    res = []
+
     for result_type in [['preserve', 'cross'], ['preserve', 'preserve'], ['cross', 'preserve'], ['cross', 'cross']]:
         print(f'result_type {result_type}')
         a1 = 1 / sp.integrate.quad(target_distribution_1, y1_span[0], y1_span[1])[0]
@@ -99,6 +117,7 @@ def solve_two_mirrors_parallel_source_two_targets(starting_density: Callable, ta
         x_arr_u = np.linspace(x_span[0], x_span[1], precision)
         spline_u = sp.interpolate.CubicSpline(x_discrete, u_discrete)
         plt.plot(x_arr_u, spline_u(x_arr_u), "r")
+        plt.plot(x_arr_u, u_solved.sol(x_arr_u)[0], "k")
         if BEAMPROPERTIES[result_type[0]]['sign'] == -1:  # * BEAMPROPERTIES[result_type[1]]['sign'] == -1:
             B1 = np.flipud(B1)
             B2 = np.flipud(B2)
@@ -118,5 +137,10 @@ def solve_two_mirrors_parallel_source_two_targets(starting_density: Callable, ta
         plt.tight_layout()
         plt.show()
 
-    return None
+        res.append({'solution_type': result_type,
+                    'u': u_solved.sol, 'domain_u': (x_arr_u[0], x_arr_u[-1]), 'u_spline': spline_u,
+                    # 'w': w_solved.sol,
+                    'domain_w': (x_arr_w[0], x_arr_w[-1]), 'w_spline': spline_w}
+                   )
 
+    return res
