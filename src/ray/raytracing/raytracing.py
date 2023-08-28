@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import scipy as sp
 import matplotlib as mpl
 mpl.rcParams['figure.dpi'] = 100
+COLORS = {'szegedblue': '#3f3fa6'}
 
 
 def line(p1, p2):
@@ -73,7 +74,7 @@ if __name__ == '__main__':
     B_relevant = np.flipud(B)
     print(B_relevant)
     spline_A = sp.interpolate.CubicSpline(A[:, 0], A[:, 1])
-    spline_B = sp.interpolate.CubicSpline(B_relevant[:, 0], B_relevant[:, 1])
+    spline_B = sp.interpolate.CubicSpline(B_relevant[:, 0], B_relevant[:, 1], extrapolate=True)
     # spline_B = sp.interpolate.CubicSpline(np.flipud(B[:][0]), np.flipud(B[:][1]))
     # spline_B = sp.interpolate.CubicSpline(np.flipud(B[:][0]), B[:][1])
 
@@ -85,7 +86,7 @@ if __name__ == '__main__':
     # plt.plot(B[:, 0], B[:, 1], "k")
     # plt.show()
 
-    RUNS = 30
+    RUNS = 1000
     errn = np.zeros(RUNS)
     for n_rays in range(1, RUNS):
         # n_rays = 490
@@ -121,9 +122,9 @@ if __name__ == '__main__':
         hits_U = spline_A(xis)
         hits_U_prime = spline_A(xis, 1)
         U_reflection = - np.sin(np.arccos(hits_U_prime))
-        plt.plot(xis, hits_U)
-        plt.plot([xis, xis, xis + 10], [np.zeros(len(xis)), hits_U, hits_U + 10*U_reflection])
-        plt.show()
+        # plt.plot(xis, hits_U)
+        # plt.plot([xis, xis, xis + 10], [np.zeros(len(xis)), hits_U, hits_U + 10*U_reflection])
+        # plt.show()
 
         # Second reflector
         Bs = np.zeros((n_rays, 2))
@@ -148,7 +149,7 @@ if __name__ == '__main__':
                     break
             # calculate intersection with spline reflector
             # ray_AB = lambda x: spline_A(xis[i]) - spline_A(xis[i], 1) * x
-            # diff = lambda x: spline_B(x) + ray_AB(x)
+            # diff = lambda x: spline_B(x) - ray_AB(x)
             # spline_intersections[i] = sp.optimize.newton(diff, m1(xis[i]))  # , fprime2=lambda x: 6 * x)
                 # sp.optimize.bisect(diff, a=-20, b=20)
         # spline_B
@@ -196,6 +197,6 @@ if __name__ == '__main__':
         # print(f'error: {error}\nsum(error): {sum(error)}')
         # print(f'targets: {targets}')
         errn[n_rays] = np.nansum(error)
-    plt.plot(np.arange(1, RUNS+1, 1), errn)
+    plt.plot(np.arange(1, RUNS+1, 1), errn, COLORS['szegedblue'])
     plt.title('ERTE, Affine Reflector')
     plt.show()
