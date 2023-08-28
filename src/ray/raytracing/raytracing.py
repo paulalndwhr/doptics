@@ -41,9 +41,10 @@ y2_span = (11, 13)
 x_span = (0, 3)
 u0 = 4
 w0 = 6
-E = lambda x: np.exp(-((x - 1.5) / 1)**2 / 2) / (2 * np.pi)**.5
+# E = lambda x: np.exp(-((x - 1.5) / 1)**2 / 2) / (2 * np.pi)**.5
 G1 = lambda y1: 1
 G2 = lambda y2: 1
+E = G2
 pm1 = -1
 pm2 = 1
 
