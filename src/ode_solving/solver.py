@@ -1,15 +1,27 @@
 import scipy.integrate as sci
 import scipy as sp
-from typing import Callable, List
+from typing import Callable, List, Union
+from numpy.typing import ArrayLike
 import matplotlib.pyplot as plt
 import numpy as np
 # from main import FILENAME
 
 
 def solve_single_mirror_parallel_source(starting_distribution: Callable, target_distribution: Callable,
-                                        x_span: List[float], y_span: List[float],
+                                        x_span: Union[ArrayLike, List[float]], y_span: Union[ArrayLike, List[float]],
                                         u0: float, L: float,
                                         number_rays=15):
+    """
+
+    :param starting_distribution: Callable
+    :param target_distribution: Callable
+    :param x_span: ArrayLike of type float
+    :param y_span: ArrayLike of type float
+    :param u0: float, values as specified in https://doi.org/10.25368/2023.148
+    :param L: float, values as specified in https://doi.org/10.25368/2023.148
+    :param number_rays:
+    :return:
+    """
     xs = np.linspace(x_span[0], x_span[1], number_rays)
     for result_type in [1, -1]:
         a = sp.integrate.quad(starting_distribution, x_span[0], x_span[1])[0] / \
