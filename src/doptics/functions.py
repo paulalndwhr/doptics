@@ -66,7 +66,7 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
                                                     precision: float = 1000) -> (Callable, Callable,
                                                                                  List[float], List[float],
                                                                                  float, float):
-    """
+    r"""
     Angles should be negative if light is supposed to hit from below. You must not include 0 inn D for the moment
     :param angle_denstiy: defined on Radians $D = [d_l, d_r] \subsetneq (-\pi, pi)$ with $\lambda(D) < \pi$
     :param small_angle: float, in radians
@@ -125,7 +125,7 @@ def g(x):
 def rescaling_target_distribution():
     xl = -10
     xr = 4
-    #f is the density on x
+    # f is the density on x
     yl = 0
     yr = 3
     integral_x = sc.integrate.quad(f, xl, xr)
@@ -134,5 +134,3 @@ def rescaling_target_distribution():
     integral_y1 = appropriate_g_factor * sc.integrate.quad(g, yl, yr)[0]
     print(integral_x[0])
     print(integral_y1)
-
-

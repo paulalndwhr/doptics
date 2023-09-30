@@ -1,0 +1,22 @@
+Metadata-Version: 2.1
+Name: doptics
+Version: 0.0.0
+Summary: doptics - Differential Equation-based Optics Design Tool for Integrated Complex Systems
+Author: Philipp Landwehr and Santeri Röpelinen and Maddalena Zanrosso and Csaba Rosztoczy and Paulius Cebatarauskas
+License: GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+Platform: unix
+Platform: linus
+Platform: osx
+Platform: win32
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: only
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.7
+License-File: LICENSE
+Requires-Dist: pandas>=2
+Requires-Dist: numpy>=1
+Requires-Dist: icecream>=2
