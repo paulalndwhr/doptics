@@ -3,7 +3,7 @@ import numpy as np
 import scipy as sp
 from typing import Callable, List
 from numpy.typing import ArrayLike
-from main import YL, YR, SIGMA, XL, XR
+# from main import YL, YR, SIGMA, XL, XR
 
 
 uniform = lambda x: 1
@@ -66,7 +66,7 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
                                                     precision: float = 1000) -> (Callable, Callable,
                                                                                  List[float], List[float],
                                                                                  float, float):
-    """
+    r"""
     Angles should be negative if light is supposed to hit from below. You must not include 0 inn D for the moment
     :param angle_denstiy: defined on Radians $D = [d_l, d_r] \subsetneq (-\pi, pi)$ with $\lambda(D) < \pi$
     :param small_angle: float, in radians
@@ -101,8 +101,13 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
 
     print(y2_span)
 
-    y1_density = lambda y1: angle_density(np.arccos(y1 / np.linalg.norm(np.array([y1-center[0], l1-center[1]], dtype=object)))) / np.linalg.norm(np.array([y1-center[0], l1-center[1]], dtype=object))
-    y2_density = lambda y2: angle_density(np.arccos(y2 / np.linalg.norm(np.array([y2-center[0], l2-center[1]], dtype=object)))) / np.linalg.norm(np.array([y2-center[0], l2-center[1]], dtype=object))
+    y1_density = lambda y1: (angle_density(np.arccos(y1 / np.linalg.norm(np.array(
+        [y1-center[0], l1-center[1]], dtype=object)))) /
+                             np.linalg.norm(np.array([y1-center[0], l1-center[1]], dtype=object)))
+    y2_density = lambda y2: (angle_density(np.arccos(y2 / np.linalg.norm(np.array(
+        [y2-center[0], l2-center[1]], dtype=object)))) /
+                             np.linalg.norm(np.array([y2-center[0], l2-center[1]], dtype=object)))
+
     for i in np.linspace(small_angle, large_angle, 100):
         print(f'y2({i}) = {y2_density(i)}')
     y1_span = y1_span + center[0]
@@ -125,7 +130,7 @@ def g(x):
 def rescaling_target_distribution():
     xl = -10
     xr = 4
-    #f is the density on x
+    # f is the density on x
     yl = 0
     yr = 3
     integral_x = sc.integrate.quad(f, xl, xr)
@@ -134,5 +139,3 @@ def rescaling_target_distribution():
     integral_y1 = appropriate_g_factor * sc.integrate.quad(g, yl, yr)[0]
     print(integral_x[0])
     print(integral_y1)
-
-

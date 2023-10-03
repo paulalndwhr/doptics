@@ -3,9 +3,9 @@ import scipy as sp
 from typing import Callable, List
 import matplotlib.pyplot as plt
 import numpy as np
-from src.ode_solving.symbolic import u_prime_mv
-from src.ode_solving.functions import cdf_sampling_source
-import src.ode_solving.functions as func
+from doptics.symbolic import u_prime_mv
+from doptics.functions import cdf_sampling_source
+import doptics.functions as func
 
 
 # from main import FILENAME
