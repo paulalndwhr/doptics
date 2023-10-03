@@ -3,7 +3,7 @@ import numpy as np
 import scipy as sp
 from typing import Callable, List
 from numpy.typing import ArrayLike
-from main import YL, YR, SIGMA, XL, XR
+# from main import YL, YR, SIGMA, XL, XR
 
 
 uniform = lambda x: 1
@@ -101,8 +101,13 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
 
     print(y2_span)
 
-    y1_density = lambda y1: angle_density(np.arccos(y1 / np.linalg.norm(np.array([y1-center[0], l1-center[1]], dtype=object)))) / np.linalg.norm(np.array([y1-center[0], l1-center[1]], dtype=object))
-    y2_density = lambda y2: angle_density(np.arccos(y2 / np.linalg.norm(np.array([y2-center[0], l2-center[1]], dtype=object)))) / np.linalg.norm(np.array([y2-center[0], l2-center[1]], dtype=object))
+    y1_density = lambda y1: (angle_density(np.arccos(y1 / np.linalg.norm(np.array(
+        [y1-center[0], l1-center[1]], dtype=object)))) /
+                             np.linalg.norm(np.array([y1-center[0], l1-center[1]], dtype=object)))
+    y2_density = lambda y2: (angle_density(np.arccos(y2 / np.linalg.norm(np.array(
+        [y2-center[0], l2-center[1]], dtype=object)))) /
+                             np.linalg.norm(np.array([y2-center[0], l2-center[1]], dtype=object)))
+
     for i in np.linspace(small_angle, large_angle, 100):
         print(f'y2({i}) = {y2_density(i)}')
     y1_span = y1_span + center[0]
