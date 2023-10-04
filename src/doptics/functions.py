@@ -3,7 +3,7 @@ import numpy as np
 import scipy as sp
 from typing import Callable, List
 from numpy.typing import ArrayLike
-# from main import YL, YR, SIGMA, XL, XR
+from main import YL, YR, SIGMA, XL, XR
 
 
 uniform = lambda x: 1
