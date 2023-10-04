@@ -3,8 +3,12 @@ import numpy as np
 import scipy as sp
 from typing import Callable, List
 from numpy.typing import ArrayLike
-from main import YL, YR, SIGMA, XL, XR
 
+YL = 0
+YR = 2
+SIGMA = 1
+XL = 1
+XR = 9
 
 uniform = lambda x: 1
 triangle = lambda x: x
