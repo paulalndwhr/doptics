@@ -19,4 +19,3 @@ def u_prime_mv():
     dudx = solve(Eq(diff(sol, x), 0), diff(u))[0].simplify()
 
     return lambdify([x, y, u, V, t1, t2, L1], dudx), lambdify([x, y, u, V, t1, t2, L1], sol)
-

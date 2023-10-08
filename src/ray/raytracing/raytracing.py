@@ -27,8 +27,6 @@ def intersection(l1, l2):
         return np.nan
 
 
-
-
 """
 Example of ray tracing
 Variable names are same as in the report
@@ -160,7 +158,6 @@ if __name__ == '__main__':
         # plt.plot(xis, hits_U)
         # plt.plot([xis, xis, xis + 10], [np.zeros(len(xis)), hits_U, hits_U - 10 * U_reflection])
         # plt.show()
-
 
         # Plotting
         # for i in range(n_rays):
