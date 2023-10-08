@@ -1,4 +1,3 @@
-# from sympy import *
 from sympy import Function, symbols, solve, lambdify, Eq, diff
 
 
