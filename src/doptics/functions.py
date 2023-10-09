@@ -3,6 +3,7 @@ import numpy as np
 import scipy as sp
 from typing import Callable, List
 from numpy.typing import ArrayLike
+from icecream import ic
 
 YL = 0
 YR = 2
@@ -95,25 +96,31 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
         np.array([np.cos(large_angle), np.cos(small_angle) * np.sin(abs_large_angle)/np.sin(abs_small_angle)])
     )
 
-    print(y1_span)
-    print(y2_span)
+    ic(y1_span)
+    ic(y2_span)
 
     if l1 == l2:
         l2 = 1.4 * l2
         y2_span[0] = 1.4 * y2_span[0]
         y2_span[1] = 1.4 * y2_span[1]
 
-    print(y2_span)
+    ic(y2_span)
 
-    y1_density = lambda y1: (angle_density(np.arccos(y1 / np.linalg.norm(np.array(
-        [y1-center[0], l1-center[1]], dtype=object)))) /
-                             np.linalg.norm(np.array([y1-center[0], l1-center[1]], dtype=object)))
-    y2_density = lambda y2: (angle_density(np.arccos(y2 / np.linalg.norm(np.array(
-        [y2-center[0], l2-center[1]], dtype=object)))) /
-                             np.linalg.norm(np.array([y2-center[0], l2-center[1]], dtype=object)))
+    def y1_density(y1):
+        return (angle_density(np.arccos(y1 / np.linalg.norm(np.array(
+            [y1 - center[0], l1 - center[1]], dtype=object)))) /
+                np.linalg.norm(np.array([y1 - center[0], l1 - center[1]], dtype=object))
+                )
 
-    for i in np.linspace(small_angle, large_angle, 100):
-        print(f'y2({i}) = {y2_density(i)}')
+    def y2_density(y2):
+        return (angle_density(np.arccos(y2 / np.linalg.norm(np.array(
+            [y2 - center[0], l2 - center[1]], dtype=object)))) /
+                np.linalg.norm(np.array([y2 - center[0], l2 - center[1]], dtype=object))
+                )
+
+    # for i in np.linspace(small_angle, large_angle, 100):
+    #     print(f'y2({i}) = {y2_density(i)}')
+
     y1_span = y1_span + center[0]
     y2_span = y2_span + center[0]
     for j in np.linspace(y2_span[0], y2_span[1], 100):
@@ -123,15 +130,13 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
     return y1_density, y2_density, y1_span, y2_span, l1 + center[1], l2 + center[1]
 
 
-def f(x):
-    return 1
+def f(x): return 1
 
 
-def g(x):
-    return x**2
+def g(x, mu=0): return (x-mu)**2
 
 
-def rescaling_target_distribution():
+def rescaling_target_distribution() -> None:
     xl = -10
     xr = 4
     # f is the density on x
