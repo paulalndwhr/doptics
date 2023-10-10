@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
 import matplotlib as mpl
+from functools import lru_cache
 mpl.rcParams['figure.dpi'] = 100
 COLORS = {'szegedblue': '#3f3fa6'}
 
@@ -34,35 +35,36 @@ Variable names are same as in the report
 
 L1 = 8
 L2 = 14
-y1_span = (10.5, 13.5)
-y2_span = (11, 13)
-x_span = (0, 3)
+y1_SPAN = (10.5, 13.5)
+y2_SPAN = (11, 13)
+x_SPAN = (0, 3)
 u0 = 4
 w0 = 6
 # E = lambda x: np.exp(-((x - 1.5) / 1)**2 / 2) / (2 * np.pi)**.5
-G1 = lambda y1: 1
-G2 = lambda y2: 1
+def G1(y1): return 1
+def G2(y2): return 1
+
+
 E = G2
-pm1 = -1
-pm2 = 1
+PM1 = -1
+PM2 = 1
+
+
+@lru_cache(maxsize=100)
+def integrate(f_, left: float, right: float) -> float:
+    return sp.integrate.quad(f_, left, right)[0]
 
 
 if __name__ == '__main__':
     # calculate theoretical target from the mapping between emitting density E and target density G1
-    G1_int = sp.integrate.quad(G1, y1_span[0], y1_span[1])[0]
-    G1_fixed = lambda y1: G1(y1) / G1_int
-    E_int = sp.integrate.quad(E, x_span[0], x_span[1])[0]
-    E_fixed = lambda x: E(x) / E_int
-    # a2 = G1_int / sp.integrate.quad(G2, y2_span[0], y2_span[1])[0]
-    # print(f'calculated a2 as {a2}')
-    # G2_fixed = lambda y2: a2 * G2(y2)
-    # a1 = G1_int / sp.integrate.quad(E, x_span[0], x_span[1])[0]
-    # E_fixed = lambda x: a1 * E(x)
+    def G1_fixed(y1, y1_span=y1_SPAN): return G1(y1) / integrate(G1, y1_span[0], y1_span[1])
+    def E_fixed(x, x_span=x_SPAN): return E(x) / integrate(x, x_span[0], x_span[1])
+    def m1_prime(x, m, pm1=PM1): return pm1 * E_fixed(x) / G1_fixed(m)
 
-    m1_prime = lambda x, m: pm1 * E_fixed(x) / G1_fixed(m)
-    y1_0 = y1_span[1]
-    m1_solved = sp.integrate.solve_ivp(m1_prime, x_span, [y1_0], dense_output=1)
-    m1 = lambda x: m1_solved.sol(x)[0]
+    y1_0 = y1_SPAN[1]
+    m1_solved = sp.integrate.solve_ivp(m1_prime, x_SPAN, [y1_0], dense_output=1)
+    def m1(x): return m1_solved.sol(x)[0]
+    # m1 = lambda x: m1_solved.sol(x)[0]
 
     # absue that solution was calculated already by importing mirror points
     reflectors = np.load("reflectors.npz")
@@ -77,7 +79,7 @@ if __name__ == '__main__':
     # spline_B = sp.interpolate.CubicSpline(np.flipud(B[:][0]), np.flipud(B[:][1]))
     # spline_B = sp.interpolate.CubicSpline(np.flipud(B[:][0]), B[:][1])
 
-    # x_arr_u = np.linspace(x_span[0], x_span[1], 1000)
+    # x_arr_u = np.linspace(x_SPAN[0], x_SPAN[1], 1000)
     # x_arr_w = np.linspace(B[0][0], B[-1][0], 1000)
     # plt.plot(x_arr_u, spline_A(x_arr_u), "r")
     # plt.plot(A[:, 0], A[:, 1], "k")
@@ -178,7 +180,7 @@ if __name__ == '__main__':
             ray_low = (Bs[i][0], Bs[i][1])
             ray_upp = (Bs[i][0] + 4 * u2s[i][0], Bs[i][1] + 4 * u2s[i][1])
             ray = line(ray_low, ray_upp)
-            target_line = line((y1_span[0], L1), (y1_span[1], L1))
+            target_line = line((y1_SPAN[0], L1), (y1_SPAN[1], L1))
             intersec = intersection(target_line, ray)
             # print(intersec)
             try:
