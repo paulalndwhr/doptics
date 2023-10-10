@@ -37,7 +37,7 @@ def solve_two_mirrors_parallel_source_two_targets(starting_density: Callable, ta
     """
     x_discrete = np.linspace(x_span[0], x_span[1], number_rays)
     ax = sp.integrate.quad(starting_density, x_span[0], x_span[1])[0]
-    starting_density_rescaled = lambda x: 1 / ax * starting_density(x)
+    def starting_density_rescaled(x): return 1 / ax * starting_density(x)
 
     res = []
 
@@ -156,7 +156,7 @@ def solve_two_mirrors_parallel_source_point_target(starting_density: Callable, t
         small_angle=-0.7 * np.pi,
         large_angle=-0.3 * np.pi)
     # new stuff ends
-    print(f'back in main program')
+    print('back in main program')
     print(G1(y1_span[1]))
     x_discrete = np.linspace(x_span[0], x_span[1], number_rays)
 
@@ -283,4 +283,3 @@ def solve_two_mirrors_parallel_source_point_target(starting_density: Callable, t
         plt.show()
 
     return None
-

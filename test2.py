@@ -8,10 +8,6 @@ import doptics.functions as func
 import doptics.two_mirrors as tms
 from doptics.functions import cdf_sampling_source
 
-# Enable ctrl+c
-# import signal
-# signal.signal(signal.SIGINT, signal.SIG_DFL)
-
 if __name__ == '__main__':
     l1 = 5
     l2 = 10
@@ -35,18 +31,16 @@ if __name__ == '__main__':
                                                                number_rays=15
                                                                )
 
-    G1 = lambda y1: 1
-    G2 = lambda y2: 1 - np.abs(y2 - 12) if 11 < y2 < 13 else 0
-    E = lambda x: 1 / (np.exp(10 * (x - 0.5)) + np.exp(-10 * (x - 0.5)))
+    def G1(y1): return 1
+    def G2(y2): return 1 - np.abs(y2 - 12) if 11 < y2 < 13 else 0
+    def E(x): return 1 / (np.exp(10 * (x - 0.5)) + np.exp(-10 * (x - 0.5)))
 
     # new stuff
     # E = func.uniform
 
     angle_result = tms.solve_two_mirrors_parallel_source_point_target(starting_density=func.uniform,
-                                                                      target_distribution_1=lambda y1: 1,
-                                                                      target_distribution_2=lambda y2: 1 -
-                                                                                                       np.abs(y2 - 12)
-                                                                      if 11 < y2 < 13 else 0,
+                                                                      target_distribution_1=G1,
+                                                                      target_distribution_2=G2,
                                                                       x_span=x_span,
                                                                       y1_span=y1_span, y2_span=y2_span, u0=u0, w0=w0,
                                                                       l1=l1, l2=l2,

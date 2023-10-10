@@ -47,7 +47,7 @@ def solve_single_mirror_parallel_source(starting_distribution: Callable, target_
         # plt.savefig(f'solution-mirror-{FILENAME[result_type]}.png')
 
 
-def f(x:float, u:float) -> float:
+def f(x: float, u: float) -> float:
     return u**2
 
 

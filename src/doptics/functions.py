@@ -3,6 +3,7 @@ import numpy as np
 import scipy as sp
 from typing import Callable, List
 from numpy.typing import ArrayLike
+from icecream import ic
 
 YL = 0
 YR = 2
@@ -10,14 +11,15 @@ SIGMA = 1
 XL = 1
 XR = 9
 
-uniform = lambda x: 1
-triangle = lambda x: x
-normal_10 = lambda x: np.exp(-0.5*((x-0)/SIGMA)**2) + 0.1
+
+def uniform(x): return 1
+def triangle(x): return x
+def normal_source(x, xl=XL, xr=XR, sigma=SIGMA): return np.exp(-0.5*((x-((xl+xr)*0.5))/sigma)**2) + 0.01
+def normal_target(x, yl=YL, yr=YR, sigma=SIGMA): return np.exp(-0.5*((x-((yl+yr)*0.5))/sigma)**2) + 0.01
+normal_10 = lambda x: np.exp(-0.5 * ((x - 0) / SIGMA) ** 2) + 0.1
 G1 = lambda y1: 1
 G2 = lambda y2: 1 - np.abs(y2 - 12) if 11 < y2 < 13 else 0
 E = lambda x: 1 / (np.exp(10 * (x - 0.5)) + np.exp(-10 * (x - 0.5)))
-normal_target = lambda x: np.exp(-0.5*((x-((YR+YL)*0.5))/SIGMA)**2) + 0.01
-normal_source = lambda x: np.exp(-0.5*((x-((XR+XL)*0.5))/SIGMA)**2) + 0.01
 
 
 def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, total_samples: int = 1000):
@@ -48,14 +50,13 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
         Phi_arr[i] = Phi_arr[i - 1] + elt  # abuses np.zeros()
     Phi_arr = np.roll(Phi_arr, 1)
     Phi_arr[0] = 0
-    # return Phi_arr
     print(Phi_arr)
 
     distr_samples = np.zeros(len(linear_samples))
-    inverted_Phi = reversed(Phi_arr)
+    reversed_Phi = reversed(Phi_arr)
     quantiles = np.linspace(0, 1, len(linear_samples))
     for i in range(len(distr_samples)):
-        # ladder_index = next(x[0] for x in enumerate(inverted_Phi) if x[1] < delta*i)
+        # ladder_index = next(x[0] for x in enumerate(reversed_Phi) if x[1] < delta*i)
         # ladder_index = len([x for x in Phi_arr if x <= + i*delta]) - 1
         ladder_index = len([x for x in Phi_arr if x <= + quantiles[i]]) - 1
         distr_samples[i] = fine_ladder[ladder_index]
@@ -95,25 +96,31 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
         np.array([np.cos(large_angle), np.cos(small_angle) * np.sin(abs_large_angle)/np.sin(abs_small_angle)])
     )
 
-    print(y1_span)
-    print(y2_span)
+    ic(y1_span)
+    ic(y2_span)
 
     if l1 == l2:
         l2 = 1.4 * l2
         y2_span[0] = 1.4 * y2_span[0]
         y2_span[1] = 1.4 * y2_span[1]
 
-    print(y2_span)
+    ic(y2_span)
 
-    y1_density = lambda y1: (angle_density(np.arccos(y1 / np.linalg.norm(np.array(
-        [y1-center[0], l1-center[1]], dtype=object)))) /
-                             np.linalg.norm(np.array([y1-center[0], l1-center[1]], dtype=object)))
-    y2_density = lambda y2: (angle_density(np.arccos(y2 / np.linalg.norm(np.array(
-        [y2-center[0], l2-center[1]], dtype=object)))) /
-                             np.linalg.norm(np.array([y2-center[0], l2-center[1]], dtype=object)))
+    def y1_density(y1):
+        return (angle_density(np.arccos(y1 / np.linalg.norm(np.array(
+            [y1 - center[0], l1 - center[1]], dtype=object)))) /
+                np.linalg.norm(np.array([y1 - center[0], l1 - center[1]], dtype=object))
+                )
 
-    for i in np.linspace(small_angle, large_angle, 100):
-        print(f'y2({i}) = {y2_density(i)}')
+    def y2_density(y2):
+        return (angle_density(np.arccos(y2 / np.linalg.norm(np.array(
+            [y2 - center[0], l2 - center[1]], dtype=object)))) /
+                np.linalg.norm(np.array([y2 - center[0], l2 - center[1]], dtype=object))
+                )
+
+    # for i in np.linspace(small_angle, large_angle, 100):
+    #     print(f'y2({i}) = {y2_density(i)}')
+
     y1_span = y1_span + center[0]
     y2_span = y2_span + center[0]
     for j in np.linspace(y2_span[0], y2_span[1], 100):
@@ -123,15 +130,13 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
     return y1_density, y2_density, y1_span, y2_span, l1 + center[1], l2 + center[1]
 
 
-def f(x):
-    return 1
+def f(x): return 1
 
 
-def g(x):
-    return x**2
+def g(x, mu=0): return (x-mu)**2
 
 
-def rescaling_target_distribution():
+def rescaling_target_distribution() -> None:
     xl = -10
     xr = 4
     # f is the density on x
