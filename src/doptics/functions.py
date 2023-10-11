@@ -16,10 +16,10 @@ def uniform(x): return 1
 def triangle(x): return x
 def normal_source(x, xl=XL, xr=XR, sigma=SIGMA): return np.exp(-0.5*((x-((xl+xr)*0.5))/sigma)**2) + 0.01
 def normal_target(x, yl=YL, yr=YR, sigma=SIGMA): return np.exp(-0.5*((x-((yl+yr)*0.5))/sigma)**2) + 0.01
-normal_10 = lambda x: np.exp(-0.5 * ((x - 0) / SIGMA) ** 2) + 0.1
-G1 = lambda y1: 1
-G2 = lambda y2: 1 - np.abs(y2 - 12) if 11 < y2 < 13 else 0
-E = lambda x: 1 / (np.exp(10 * (x - 0.5)) + np.exp(-10 * (x - 0.5)))
+def normal_10(x, sigma=SIGMA): return np.exp(-0.5 * ((x - 0) / sigma) ** 2) + 0.1
+def G1(y1): return 1
+def G2(y2): return 1 - np.abs(y2 - 12) if 11 < y2 < 13 else 0
+def E(x): return 1 / (np.exp(10 * (x - 0.5)) + np.exp(-10 * (x - 0.5)))
 
 
 def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, total_samples: int = 1000):
@@ -33,12 +33,12 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
     min_ = linear_samples[0]  # =1
     max_ = linear_samples[-1]  # =2
     # delta = (max_ - min_)/(len(linear_samples)-1)
-    delta = (max_ - min_) / (len(linear_samples))
+    # delta = (max_ - min_) / (len(linear_samples))
     fine_ladder = np.linspace(min_, max_, total_samples)
-    probability_density = lambda x: source_density(x) / (sp.integrate.quad(source_density,
-                                                                           linear_samples[0],
-                                                                           linear_samples[-1])[0])
 
+    def probability_density(x): return source_density(x) / (sp.integrate.quad(source_density,
+                                                                              linear_samples[0],
+                                                                              linear_samples[-1])[0])
     phi_arr = [probability_density(sample)*(1/total_samples) for sample in fine_ladder]
     print(phi_arr)
     print('das war phi_arr')
@@ -53,7 +53,7 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
     print(Phi_arr)
 
     distr_samples = np.zeros(len(linear_samples))
-    reversed_Phi = reversed(Phi_arr)
+    # reversed_Phi = reversed(Phi_arr)
     quantiles = np.linspace(0, 1, len(linear_samples))
     for i in range(len(distr_samples)):
         # ladder_index = next(x[0] for x in enumerate(reversed_Phi) if x[1] < delta*i)

@@ -58,7 +58,7 @@ def integrate(f_, left: float, right: float) -> float:
 if __name__ == '__main__':
     # calculate theoretical target from the mapping between emitting density E and target density G1
     def G1_fixed(y1, y1_span=y1_SPAN): return G1(y1) / integrate(G1, y1_span[0], y1_span[1])
-    def E_fixed(x, x_span=x_SPAN): return E(x) / integrate(x, x_span[0], x_span[1])
+    def E_fixed(x, x_span=x_SPAN): return E(x) / integrate(E, x_span[0], x_span[1])
     def m1_prime(x, m, pm1=PM1): return pm1 * E_fixed(x) / G1_fixed(m)
 
     y1_0 = y1_SPAN[1]
