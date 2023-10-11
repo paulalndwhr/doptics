@@ -26,16 +26,19 @@ def solve_single_mirror_parallel_source(starting_distribution: Callable, target_
     for result_type in [1, -1]:
         a = sp.integrate.quad(starting_distribution, x_span[0], x_span[1])[0] / \
             sp.integrate.quad(target_distribution, y_span[0], y_span[1])[0]
-        target_denisty_fixed = lambda y: a * target_distribution(y)
 
-        m_prime = lambda x, m: result_type * starting_distribution(x) / target_denisty_fixed(m)
+        def target_denisty_fixed(y): return a * target_distribution(y)
+        def m_prime(x, m): return result_type * starting_distribution(x) / target_denisty_fixed(m)
+        # m_prime = lambda x, m: result_type * starting_distribution(x) / target_denisty_fixed(m)
 
         y0 = y_span[0] if result_type == 1 else y_span[1]
 
         m_solved = sp.integrate.solve_ivp(m_prime, x_span, [y0], t_eval=xs, dense_output=True)
         m = m_solved.sol
 
-        u_prime = lambda x, u: (m(x) - x) / (((m(x) - x)**2 + (-L + u)**2)**.5 - L + u)
+        def u_prime(x, u): return (m(x) - x) / (((m(x) - x)**2 + (-L + u)**2)**.5 - L + u)
+        # u_prime = lambda x, u: (m(x) - x) / (((m(x) - x)**2 + (-L + u)**2)**.5 - L + u)
+
         u_solved = sp.integrate.solve_ivp(u_prime, x_span, [u0], t_eval=xs).y.reshape(-1)
 
         plt.clf()
@@ -53,7 +56,7 @@ def f(x: float, u: float) -> float:
 
 def solve():
     x_arr = np.linspace(2, 5, num=50)
-    x0 = 0
+    # x0 = 0
     y0 = 2
     ret = sci.odeint(f, y0, x_arr)
     return ret
