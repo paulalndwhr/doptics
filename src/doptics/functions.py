@@ -22,6 +22,27 @@ def G2(y2): return 1 - np.abs(y2 - 12) if 11 < y2 < 13 else 0
 def E(x): return 1 / (np.exp(10 * (x - 0.5)) + np.exp(-10 * (x - 0.5)))
 
 
+def normalize(func: Callable, domain: ArrayLike) -> Callable:
+    """
+    returns the normalized value of a function f evaluated in
+    :param func:
+    :return:
+    """
+    return lambda x: func(x) / sp.integrate.quad(func, domain[0], domain[1])[0]
+
+
+def u_prime(x: float, u: float, l: float, m: Callable):
+    """
+    
+    :param x:
+    :param u:
+    :param l:
+    :param m:
+    :return:
+    """
+    return (m(x) - x) / (((m(x) - x) ** 2 + (-l + u) ** 2) ** .5 - l + u)
+
+
 def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, total_samples: int = 1000):
     """
     transforms a equidistant array into an "equi-probable" array respecting a source_density

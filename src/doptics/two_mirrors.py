@@ -150,7 +150,7 @@ def solve_two_mirrors_parallel_source_point_target(starting_density: Callable, t
                                                    u0: float, w0: float, l1: float, l2: float,
                                                    number_rays=15,
                                                    color: str = 'szegedblue') -> List[dict]:
-    E = lambda x: np.exp(-0.5 * ((x - ((1 + 0) * 0.5)) / 0.25) ** 2) + 0.01
+    def E(x): return np.exp(-0.5 * ((x - ((1 + 0) * 0.5)) / 0.25) ** 2) + 0.01
     G2, G1, y2_span, y1_span, l2, l1 = func.construct_target_density_intervals_from_angular(
         angle_density=starting_density,
         small_angle=-0.7 * np.pi,
