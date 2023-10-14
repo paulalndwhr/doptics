@@ -14,7 +14,10 @@ def test_normalize() -> None:
 @pytest.mark.parametrize("test_function,test_domain,argument,expected", [
     (uniform, [0, 1], 0, 1.0),
     (uniform, [0, 1], 0.5, 1.0),
-    (uniform, [0, 1], 1, 1.0)
+    (uniform, [0, 1], 1, 1.0),
+    (lambda x: x, [0, 1], 0, 0),
+    (lambda x: x, [0, 1], 0.5, 1),
+    (lambda x: x, [0, 1], 1, 2),
 ])
 def test_normalize(test_function, test_domain, argument, expected):
     assert normalize(test_function, test_domain)(argument) == expected
