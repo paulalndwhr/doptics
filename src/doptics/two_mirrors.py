@@ -1,6 +1,6 @@
 import scipy.integrate as sci
 import scipy as sp
-from typing import Callable, List
+from typing import Callable, List, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 from doptics.symbolic import u_prime_mv
@@ -145,8 +145,10 @@ def solve_two_mirrors_parallel_source_two_targets(starting_density: Callable, ta
 
 
 def solve_two_mirrors_parallel_source_point_target(starting_density: Callable, target_distribution_1: Callable,
-                                                   target_distribution_2, x_span: List[float], y1_span: List[float],
-                                                   y2_span: List[float],
+                                                   target_distribution_2,
+                                                   x_span: Union[List[float], Tuple[float, float]],
+                                                   # y1_span: List[float],
+                                                   # y2_span: List[float],
                                                    u0: float, w0: float, l1: float, l2: float,
                                                    number_rays=15,
                                                    color: str = 'szegedblue') -> List[dict]:

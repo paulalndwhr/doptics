@@ -31,18 +31,18 @@ if __name__ == '__main__':
                                                                number_rays=15
                                                                )
 
-    def G1(y1): return 1
-    def G2(y2): return 1 - np.abs(y2 - 12) if 11 < y2 < 13 else 0
-    def E(x): return 1 / (np.exp(10 * (x - 0.5)) + np.exp(-10 * (x - 0.5)))
+    # G1 = func.G1
+    # def G2(y2): return 1 - np.abs(y2 - 12) if 11 < y2 < 13 else 0
+    # def E(x): return 1 / (np.exp(10 * (x - 0.5)) + np.exp(-10 * (x - 0.5)))
 
     # new stuff
     # E = func.uniform
 
     angle_result = tms.solve_two_mirrors_parallel_source_point_target(starting_density=func.uniform,
-                                                                      target_distribution_1=G1,
-                                                                      target_distribution_2=G2,
+                                                                      target_distribution_1=func.G1,
+                                                                      target_distribution_2=func.G2,
                                                                       x_span=x_span,
-                                                                      y1_span=y1_span, y2_span=y2_span, u0=u0, w0=w0,
+                                                                      u0=u0, w0=w0,
                                                                       l1=l1, l2=l2,
                                                                       # color='#a69f3f',
                                                                       number_rays=16)
