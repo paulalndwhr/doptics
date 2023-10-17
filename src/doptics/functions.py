@@ -1,7 +1,7 @@
 import scipy as sc
 import numpy as np
 import scipy as sp
-from typing import Callable, List
+from typing import Callable, List, Tuple
 from numpy.typing import ArrayLike
 from icecream import ic
 
@@ -61,9 +61,7 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
                                                                               linear_samples[0],
                                                                               linear_samples[-1])[0])
     phi_arr = [probability_density(sample)*(1/total_samples) for sample in fine_ladder]
-    print(phi_arr)
-    print('das war phi_arr')
-    print(sum(phi_arr))
+    ic(phi_arr)
 
     # abusing that Phi_arr is initialized as np.zeros(len(phi_arr)), the following speed-up can be achieved:
     Phi_arr = np.zeros(len(phi_arr))
@@ -71,7 +69,7 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
         Phi_arr[i] = Phi_arr[i - 1] + elt  # abuses np.zeros()
     Phi_arr = np.roll(Phi_arr, 1)
     Phi_arr[0] = 0
-    print(Phi_arr)
+    ic(Phi_arr)
 
     distr_samples = np.zeros(len(linear_samples))
     # reversed_Phi = reversed(Phi_arr)
@@ -85,37 +83,60 @@ def cdf_sampling_source(source_density: Callable, linear_samples: ArrayLike, tot
     return distr_samples
 
 
+def construct_y_spans(small_angle: float, large_angle: float) -> Tuple[ArrayLike]:
+    r"""
+    Construct the interval targets for point targets with an angular lighting distribution.
+    
+    Make sure that the absolute value $\vert small_angle - large_angle \vert < \pi$
+    
+    :param small_angle: in radians, somewhere between $-\pi$ and $\pi$.
+    :param large_angle: in radians, somewhere between $-\pi$ and $\pi$.
+    :return: intervals y1_span and y2_span which are hit by the light rays which hit the target
+    """
+    abs_small_angle = small_angle if np.abs(np.sin(small_angle)) < np.abs(np.sin(large_angle)) else large_angle
+    abs_large_angle = small_angle if np.abs(np.sin(small_angle)) > np.abs(np.sin(large_angle)) else large_angle
+
+    y1_span = np.array([np.cos(small_angle), np.cos(large_angle) * np.sin(abs_small_angle) / np.sin(abs_large_angle)])
+    y2_span = np.sort(
+        np.array([np.cos(large_angle), np.cos(small_angle) * np.sin(abs_large_angle) / np.sin(abs_small_angle)])
+    )
+    return (y1_span, y2_span)
+
+
 def construct_target_density_intervals_from_angular(angle_density: Callable,
                                                     small_angle: float,
                                                     large_angle: float,
-                                                    center: List[float] = [10, 10],
+                                                    midpoint: List[float] = [10, 10],
                                                     precision: float = 1000) -> (Callable, Callable,
                                                                                  List[float], List[float],
                                                                                  float, float):
     r"""
     Angles should be negative if light is supposed to hit from below. You must not include 0 inn D for the moment
-    :param angle_denstiy: defined on Radians $D = [d_l, d_r] \subsetneq (-\pi, pi)$ with $\lambda(D) < \pi$
+    :param angle_density: defined on Radians $D = [d_l, d_r] \subsetneq (-\pi, pi)$ with $\lambda(D) < \pi$
     :param small_angle: float, in radians
     :param large_angle: float, in radians
+    :param midpoint: List[float] (length=2), the midpoint 
     :param precision: int, number of evaluations of the density
     :return:
     """
-    # center = (0, 0)
+    # midpoint = (0, 0)
 
     # find largest angle and construct levels
     abs_small_angle = small_angle if np.abs(np.sin(small_angle)) < np.abs(np.sin(large_angle)) else large_angle
     abs_large_angle = small_angle if np.abs(np.sin(small_angle)) > np.abs(np.sin(large_angle)) else large_angle
     l1 = round(np.sin(abs_small_angle), 5)
     l2 = round(np.sin(abs_large_angle), 5)
-    print(f'l1 = {l1}')
-    print(f'l2 = {l2}')
-    print(np.cos(small_angle))
-    print(np.cos(large_angle))
+    ic(f'l1 = {l1}')
+    ic(f'l2 = {l2}')
+    ic(np.cos(small_angle))
+    ic(np.cos(large_angle))
 
-    y1_span = np.array([np.cos(small_angle), np.cos(large_angle) * np.sin(abs_small_angle)/np.sin(abs_large_angle)])
-    y2_span = np.sort(
-        np.array([np.cos(large_angle), np.cos(small_angle) * np.sin(abs_large_angle)/np.sin(abs_small_angle)])
-    )
+    y1_span, y2_span = construct_y_spans(small_angle, large_angle)
+
+    # y1_span = np.array([np.cos(small_angle), np.cos(large_angle) * np.sin(abs_small_angle)/np.sin(abs_large_angle)])
+    # y2_span = np.sort(
+    #     np.array([np.cos(large_angle), np.cos(small_angle) * np.sin(abs_large_angle)/np.sin(abs_small_angle)])
+    # )
 
     ic(y1_span)
     ic(y2_span)
@@ -129,26 +150,26 @@ def construct_target_density_intervals_from_angular(angle_density: Callable,
 
     def y1_density(y1):
         return (angle_density(np.arccos(y1 / np.linalg.norm(np.array(
-            [y1 - center[0], l1 - center[1]], dtype=object)))) /
-                np.linalg.norm(np.array([y1 - center[0], l1 - center[1]], dtype=object))
+            [y1 - midpoint[0], l1 - midpoint[1]], dtype=object)))) /
+                np.linalg.norm(np.array([y1 - midpoint[0], l1 - midpoint[1]], dtype=object))
                 )
 
     def y2_density(y2):
         return (angle_density(np.arccos(y2 / np.linalg.norm(np.array(
-            [y2 - center[0], l2 - center[1]], dtype=object)))) /
-                np.linalg.norm(np.array([y2 - center[0], l2 - center[1]], dtype=object))
+            [y2 - midpoint[0], l2 - midpoint[1]], dtype=object)))) /
+                np.linalg.norm(np.array([y2 - midpoint[0], l2 - midpoint[1]], dtype=object))
                 )
 
     # for i in np.linspace(small_angle, large_angle, 100):
     #     print(f'y2({i}) = {y2_density(i)}')
 
-    y1_span = y1_span + center[0]
-    y2_span = y2_span + center[0]
+    y1_span = y1_span + midpoint[0]
+    y2_span = y2_span + midpoint[0]
     for j in np.linspace(y2_span[0], y2_span[1], 100):
-        print(f'arg to take arccos from = {j / np.linalg.norm([j - center[0], l2 - center[1]])}')
+        print(f'arg to take arccos from = {j / np.linalg.norm([j - midpoint[0], l2 - midpoint[1]])}')
     print(f'{y1_span[0]}pppppp{y1_density(y1_span[1])}')
     print(f'qqqqqqq{y2_density(y2_span[0])}')
-    return y1_density, y2_density, y1_span, y2_span, l1 + center[1], l2 + center[1]
+    return y1_density, y2_density, y1_span, y2_span, l1 + midpoint[1], l2 + midpoint[1]
 
 
 def f(x): return 1
