@@ -1,5 +1,6 @@
 import doptics.functions as func
 import doptics.target as tg
+import numpy as np
 from typing import Callable
 from icecream import ic
 
@@ -26,6 +27,8 @@ def test_point_target_construction():
     
     # assert targ.y1_density == y1_density
     # assert targ.y2_density == y2_density
+    assert np.array_equiv(targ.y1_span, y1_span)
+    assert np.array_equiv(targ.y2_span, y2_span)
     assert (targ.y1_span == y1_span).all()
     assert (targ.y2_span == y2_span).all()
     assert targ.l1 == l1

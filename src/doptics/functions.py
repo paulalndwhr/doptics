@@ -187,3 +187,9 @@ def rescaling_target_distribution() -> None:
     integral_y1 = appropriate_g_factor * sc.integrate.quad(g, yl, yr)[0]
     print(integral_x[0])
     print(integral_y1)
+
+
+def function_equality_checker(true_func: Callable, test_func: Callable, domain: ArrayLike):
+    sample = (domain[1] - domain[0]) * np.random.Generator.random() + domain[0]
+
+    return False
