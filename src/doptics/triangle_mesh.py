@@ -23,6 +23,26 @@ class Mesh:
     cells: NDArray([3, 3])  # i want shape (:,3)  -> unspecified rows, three cols
 
 
+def det_2x2(a: NDArray([2, 2])):
+    """
+    returns the determinant of a real 2x2 matrix
+    :param a:
+    :return:
+    """
+    return a[0, 0] * a[1, 1] - a[1, 0] * a[0, 1]
+
+
+def inv_2x2(a: NDArray([2, 2])):
+    """
+    returns the inverse of a real 2x2 matrix
+    :param a:
+    :return:
+    """
+    a_inv = np.array([[a[1, 1], -a[0, 1]],
+                      [-a[1, 0], a[0, 0]]]
+                     ) / det_2x2(a)
+
+
 def transform(triangle: Triangle, target: Triangle = {'a': (0, 0), 'b': (1, 0), 'c': (0, 1)}):
     """
 
@@ -33,6 +53,7 @@ def transform(triangle: Triangle, target: Triangle = {'a': (0, 0), 'b': (1, 0), 
     A_T = np.array([[(triangle.points['b'][0] - triangle.points['a'][0]), (triangle.points['c'][0] - triangle.points['a'][0])],
                     [(triangle.points['b'][1] - triangle.points['a'][1]), (triangle.points['c'][1] - triangle.points['a'][1])]]
                    )
+    A_inv = sp.linalg.inv(A_T)
     b_T = np.array([[triangle.points['a'][1]],
                     [triangle.points['a'][1]]
                     ])
