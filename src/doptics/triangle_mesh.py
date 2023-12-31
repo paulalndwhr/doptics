@@ -38,9 +38,12 @@ def inv_2x2(a: NDArray([2, 2])):
     :param a:
     :return:
     """
-    a_inv = np.array([[a[1, 1], -a[0, 1]],
-                      [-a[1, 0], a[0, 0]]]
-                     ) / det_2x2(a)
+    det_a = det_2x2(a)
+    if det_a == 0:
+        raise ValueError(f"det(A) = 0 => Matrix {a} is not invertible")
+    return np.array([[a[1, 1], -a[0, 1]],
+                     [-a[1, 0], a[0, 0]]]
+                    ) / det_2x2(a)
 
 
 def transform(triangle: Triangle, target: Triangle = {'a': (0, 0), 'b': (1, 0), 'c': (0, 1)}):
